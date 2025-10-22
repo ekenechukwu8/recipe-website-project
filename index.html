@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ekene's Interactive Recipe Site</title>
+    <style>
+      /* Basic Setup & CSS Variables */
+      :root {
+        --primary-color: #ff6347;
+        --secondary-color: #fdf5e6;
+        --text-color: #333;
+        --background-color: #fff;
+        --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: sans-serif;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+      }
+
+      /* Header and Navigation */
+      header {
+        background-color: #fff;
+        padding: 1rem 5%;
+        position: sticky;
+        top: 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        z-index: 10;
+      }
+
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      nav .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+        text-decoration: none;
+      }
+
+      nav ul {
+        list-style: none;
+        display: flex;
+        gap: 2rem;
+      }
+
+      nav a {
+        text-decoration: none;
+        color: var(--text-color);
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      nav a:hover {
+        color: var(--primary-color);
+      }
+
+      /* General Section Styling */
+      section {
+        padding: 4rem 5%;
+        min-height: 80vh;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin-bottom: 1rem;
+      }
+
+      h1 {
+        font-size: 3rem;
+      }
+
+      h2 {
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      /* Home Section */
+      #home {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background-color: var(--secondary-color);
+      }
+
+      .cta-button {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        text-decoration: none;
+        margin-top: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(255, 99, 71, 0.3);
+      }
+
+      /* STRETCH GOAL 1: CSS-Only Filtering */
+      .filter-controls {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .filter-controls input[type="radio"] {
+        display: none;
+      }
+
+      .filter-controls label {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        margin: 0.5rem;
+        background-color: #f0f0f0;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .filter-controls label:hover {
+        background-color: #e0e0e0;
+        transform: translateY(-2px);
+      }
+
+      .filter-controls input[type="radio"]:checked + label {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      /* Recipe Grid and Cards */
+      .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+      }
+
+      .recipe-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: var(--card-shadow);
+        overflow: hidden;
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      /* Filter logic using CSS only */
+      #filter-all:checked ~ .recipe-grid .recipe-card {
+        display: block;
+      }
+
+      #filter-african:checked ~ .recipe-grid .recipe-card {
+        display: none;
+      }
+
+      #filter-african:checked
+        ~ .recipe-grid
+        .recipe-card[data-category="african"] {
+        display: block;
+      }
+
+      #filter-italian:checked ~ .recipe-grid .recipe-card {
+        display: none;
+      }
+
+      #filter-italian:checked
+        ~ .recipe-grid
+        .recipe-card[data-category="italian"] {
+        display: block;
+      }
+
+      #filter-american:checked ~ .recipe-grid .recipe-card {
+        display: none;
+      }
+
+      #filter-american:checked
+        ~ .recipe-grid
+        .recipe-card[data-category="american"] {
+        display: block;
+      }
+
+      .recipe-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      /* STRETCH GOAL 3: Image Gallery with Hover Zoom */
+      .recipe-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+      }
+
+      .recipe-card:hover img {
+        transform: scale(1.1);
+      }
+
+      .recipe-card h3,
+      .recipe-card p {
+        padding: 0.5rem 1rem;
+      }
+
+      /* Recipe Details Section */
+      .details-container {
+        display: flex;
+        gap: 3rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .ingredients,
+      .steps,
+      .nutrition {
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .ingredients ul,
+      .steps ol {
+        list-style-position: inside;
+      }
+
+      .ingredients li {
+        list-style: none;
+        margin-bottom: 0.5rem;
+      }
+
+      /* STRETCH GOAL 2: Animated Nutrition Bars */
+      .nutrition-bars {
+        margin-top: 2rem;
+      }
+
+      .nutrition-item {
+        margin-bottom: 1rem;
+      }
+
+      .nutrition-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+        font-size: 0.9rem;
+      }
+
+      .nutrition-bar {
+        width: 100%;
+        height: 20px;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .nutrition-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary-color), #ff8c69);
+        border-radius: 10px;
+        animation: fillBar 2s ease-out forwards;
+        transform-origin: left;
+      }
+
+      @keyframes fillBar {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 2rem;
+        background-color: #333;
+        color: #fff;
+      }
+
+      /* Home Page: Fade-in animation */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .hero-content h1,
+      .hero-content p,
+      .hero-content .cta-button {
+        animation: fadeIn 1s ease-out forwards;
+        opacity: 0;
+      }
+
+      .hero-content p {
+        animation-delay: 0.2s;
+      }
+
+      .hero-content .cta-button {
+        animation-delay: 0.4s;
+      }
+
+      /* Recipe Details: Animate steps */
+      .steps li {
+        opacity: 0;
+        animation: fadeIn 0.8s ease-out forwards;
+      }
+
+      .steps li:nth-child(1) {
+        animation-delay: 0.5s;
+      }
+      .steps li:nth-child(2) {
+        animation-delay: 1s;
+      }
+      .steps li:nth-child(3) {
+        animation-delay: 1.5s;
+      }
+      .steps li:nth-child(4) {
+        animation-delay: 2s;
+      }
+      .steps li:nth-child(5) {
+        animation-delay: 2.5s;
+      }
+
+      /* Ingredients: Checkboxes */
+      .ingredients input[type="checkbox"] {
+        margin-right: 10px;
+      }
+
+      .ingredients input[type="checkbox"]:checked + label {
+        color: var(--primary-color);
+        text-decoration: line-through;
+        transition: color 0.3s ease;
+      }
+
+      /* Accessibility */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2rem;
+        }
+
+        nav ul {
+          gap: 1rem;
+        }
+
+        .filter-controls label {
+          padding: 0.4rem 1rem;
+          font-size: 0.9rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="#home" class="logo">RecipeBook</a>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#recipes">Recipes</a></li>
+          <li><a href="#recipe-details">Details</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="home">
+        <div class="hero-content">
+          <h1>Delicious Recipes, Animated.</h1>
+          <p>Discover recipes brought to life with CSS animations.</p>
+          <a href="#recipes" class="cta-button">View Recipes</a>
+        </div>
+      </section>
+
+      <section id="recipes">
+        <h2>Our Recipes</h2>
+
+        <!-- STRETCH GOAL 1: CSS-Only Filtering -->
+        <div class="filter-controls">
+          <input type="radio" name="filter" id="filter-all" checked />
+          <label for="filter-all">All Recipes</label>
+
+          <input type="radio" name="filter" id="filter-african" />
+          <label for="filter-african">African</label>
+
+          <input type="radio" name="filter" id="filter-italian" />
+          <label for="filter-italian">Italian</label>
+
+          <input type="radio" name="filter" id="filter-american" />
+          <label for="filter-american">American</label>
+        </div>
+
+        <div class="recipe-grid">
+          <div class="recipe-card" data-category="african">
+            <img
+              src="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=400"
+              alt="Jollof Rice"
+            />
+            <h3>Jollof Rice</h3>
+            <p>
+              A classic West African dish known for its vibrant color and deep
+              flavor.
+            </p>
+          </div>
+          <div class="recipe-card" data-category="italian">
+            <img
+              src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400"
+              alt="Pizza"
+            />
+            <h3>Classic Pizza</h3>
+            <p>A delicious homemade pizza with your favorite toppings.</p>
+          </div>
+          <div class="recipe-card" data-category="american">
+            <img
+              src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400"
+              alt="Pancakes"
+            />
+            <h3>Fluffy Pancakes</h3>
+            <p>Start your day with a stack of perfectly fluffy pancakes.</p>
+          </div>
+          <div class="recipe-card" data-category="italian">
+            <img
+              src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400"
+              alt="Pasta"
+            />
+            <h3>Creamy Pasta</h3>
+            <p>Rich and creamy pasta with fresh ingredients.</p>
+          </div>
+          <div class="recipe-card" data-category="african">
+            <img
+              src="https://images.unsplash.com/photo-1585032226651-759b368d7246?w=400"
+              alt="Suya"
+            />
+            <h3>Spicy Suya</h3>
+            <p>Grilled meat skewers with West African spice blend.</p>
+          </div>
+          <div class="recipe-card" data-category="american">
+            <img
+              src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400"
+              alt="Burger"
+            />
+            <h3>Gourmet Burger</h3>
+            <p>Juicy burger with premium toppings and homemade sauce.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="recipe-details">
+        <h2>Jollof Rice Recipe</h2>
+        <div class="details-container">
+          <div class="ingredients">
+            <h3>Ingredients</h3>
+            <ul>
+              <li>
+                <input type="checkbox" id="item1" />
+                <label for="item1">2 cups Rice</label>
+              </li>
+              <li>
+                <input type="checkbox" id="item2" />
+                <label for="item2">4 large Tomatoes</label>
+              </li>
+              <li>
+                <input type="checkbox" id="item3" />
+                <label for="item3">1 cup Chicken Broth</label>
+              </li>
+              <li>
+                <input type="checkbox" id="item4" />
+                <label for="item4">Spices & Seasoning</label>
+              </li>
+              <li>
+                <input type="checkbox" id="item5" />
+                <label for="item5">2 tbsp Vegetable Oil</label>
+              </li>
+              <li>
+                <input type="checkbox" id="item6" />
+                <label for="item6">1 Onion (diced)</label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="steps">
+            <h3>Instructions</h3>
+            <ol>
+              <li>
+                Blend tomatoes, peppers, and onions to create a smooth paste.
+              </li>
+              <li>Sauté the paste in oil until the water content reduces.</li>
+              <li>Add chicken broth and seasonings, then bring to a boil.</li>
+              <li>
+                Stir in the washed rice, cover the pot, and simmer on low heat.
+              </li>
+              <li>
+                Cook until all the liquid is absorbed and the rice is tender.
+              </li>
+            </ol>
+          </div>
+
+          <!-- STRETCH GOAL 2: Animated Nutrition Bars -->
+          <div class="nutrition">
+            <h3>Nutrition Facts</h3>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem">
+              Per serving (1 cup)
+            </p>
+
+            <div class="nutrition-bars">
+              <div class="nutrition-item">
+                <div class="nutrition-label">
+                  <span>Calories</span>
+                  <span>350 cal</span>
+                </div>
+                <div class="nutrition-bar">
+                  <div class="nutrition-fill" style="width: 70%"></div>
+                </div>
+              </div>
+
+              <div class="nutrition-item">
+                <div class="nutrition-label">
+                  <span>Protein</span>
+                  <span>12g</span>
+                </div>
+                <div class="nutrition-bar">
+                  <div
+                    class="nutrition-fill"
+                    style="width: 48%; animation-delay: 0.2s"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="nutrition-item">
+                <div class="nutrition-label">
+                  <span>Carbs</span>
+                  <span>58g</span>
+                </div>
+                <div class="nutrition-bar">
+                  <div
+                    class="nutrition-fill"
+                    style="width: 85%; animation-delay: 0.4s"
+                  ></div>
+                </div>
+              </div>
+
+              <div class="nutrition-item">
+                <div class="nutrition-label">
+                  <span>Fat</span>
+                  <span>8g</span>
+                </div>
+                <div class="nutrition-bar">
+                  <div
+                    class="nutrition-fill"
+                    style="width: 35%; animation-delay: 0.6s"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" style="text-align: center">
+        <h2>About This Project</h2>
+        <p style="max-width: 800px; margin: 0 auto; line-height: 1.8">
+          This interactive recipe website demonstrates the power of pure CSS
+          animations, transforms, and transitions. Created for CSC 4370 Web
+          Programming, it showcases modern web design techniques without relying
+          on JavaScript. Features include CSS-only filtering, animated nutrition
+          bars, hover zoom effects, and sequential step reveals.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Ekenechukwu Azubuike - CSC 4370 Project</p>
+    </footer>
+  </body>
+</html>
